@@ -10,4 +10,7 @@ public interface WeatherAPI {
 
     @GET("weather")
     Call<JsonElement> getCurrentWeatherTemperature(@Query("q") String cityName,@Query("appid") String apiKey);
+
+    @GET("forecast")
+    Call<JsonElement> getWeatherForecast(@Query("q") String cityName,@Query("appid") String apiKey);
 }

@@ -1,14 +1,14 @@
 package com.example.android.myweatherapp.Model;
 
 public class TemperatureModel {
-    private float temperature;
-    private float maxTemperature;
-    private float minTemperature;
+    private double temperature;
+    private double maxTemperature;
+    private double minTemperature;
     private String weatherName;
     private String weatherDescription;
     private String weatherIcon;
 
-    public TemperatureModel(float currentTemp, float max, float min, String weatherName, String weatherDescription, String weatherIcon) {
+    public TemperatureModel(double currentTemp, double max, double min, String weatherName, String weatherDescription, String weatherIcon) {
         this.temperature = currentTemp;
         this.maxTemperature = max;
         this.minTemperature = min;
@@ -17,15 +17,15 @@ public class TemperatureModel {
         this.weatherIcon = weatherIcon;
     }
 
-    public float getTemperature() {
+    public double getTemperature() {
         return temperature;
     }
 
-    public float getMaxTemperature() {
+    public double getMaxTemperature() {
         return maxTemperature;
     }
 
-    public float getMinTemperature() {
+    public double getMinTemperature() {
         return minTemperature;
     }
 

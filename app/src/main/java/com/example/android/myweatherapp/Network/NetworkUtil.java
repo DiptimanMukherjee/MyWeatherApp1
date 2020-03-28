@@ -2,10 +2,22 @@ package com.example.android.myweatherapp.Network;
 
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.example.android.myweatherapp.Model.TemperatureModel;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+
+import java.lang.ref.WeakReference;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,9 +32,15 @@ public class NetworkUtil implements Callback<JsonElement> {
 
     private final String API_KEY = "aaea007c8ae69c5d3e62021bc265b1cd";
     private String BASE_URl = "https://api.openweathermap.org/data/2.5/";
+    private final double KELVIN_TEMP = 273.15;
     private final WeatherAPI weatherApi;
+    private String mCityName;
+    private WeakReference<MutableLiveData<TemperatureModel>> currentTempWeakRef;
+    private WeakReference<MutableLiveData<List<TemperatureModel>>> weatherListWeakRef;
 
-    public NetworkUtil() {
+    public NetworkUtil(MutableLiveData<TemperatureModel> currentTemperature, MutableLiveData<List<TemperatureModel>> weatherList) {
+        currentTempWeakRef = new WeakReference<>(currentTemperature);
+        weatherListWeakRef = new WeakReference<>(weatherList);
         Gson gson = new GsonBuilder()
                 .setLenient()
                 .create();
@@ -38,7 +56,13 @@ public class NetworkUtil implements Callback<JsonElement> {
 
 
     public void fetchCurrentWeatherTemperature(String cityName) {
-        Call<JsonElement> call = weatherApi.getCurrentWeatherTemperature(cityName, API_KEY);
+        mCityName = cityName;
+        Call<JsonElement> call = weatherApi.getCurrentWeatherTemperature(mCityName, API_KEY);
+        call.enqueue(this);
+    }
+
+    public void fetchTemperatureForecast(String cityName) {
+        Call<JsonElement> call = weatherApi.getWeatherForecast(cityName, API_KEY);
         call.enqueue(this);
     }
 
@@ -49,22 +73,48 @@ public class NetworkUtil implements Callback<JsonElement> {
     @Override
     public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
         if(response.isSuccessful()) {
-           // Log.d(TAG, "onResponse: success = "+response.body());
             JsonElement result = response.body();
-            float temperature = (float) (result.getAsJsonObject().get("main").getAsJsonObject().get("temp").getAsFloat() - 273.15);
-            float maxTemperature = result.getAsJsonObject().get("main").getAsJsonObject().get("temp_max").getAsFloat();
-            float minTemperature = result.getAsJsonObject().get("main").getAsJsonObject().get("temp_min").getAsFloat();
+            if (result.getAsJsonObject().has("cnt")) {
+                Set<String> dateSet = new HashSet<>();
+                List<TemperatureModel> weatherList = new ArrayList<>();
 
-            JsonElement weather = result.getAsJsonObject().get("weather").getAsJsonArray().get(0);
-            String weatherName = weather.getAsJsonObject().get("main").getAsString();
-            String weatherDesc = weather.getAsJsonObject().get("description").getAsString();
-            String weatherIcon = weather.getAsJsonObject().get("icon").getAsString();
+                JsonArray list = result.getAsJsonObject().get("list").getAsJsonArray();
+                for(JsonElement content : list) {
+                    long dateInMillis = content.getAsJsonObject().get("dt").getAsLong() * 1000;
+                    DateFormat dateFormat = new SimpleDateFormat("dd/MM/YY");
+                    String date = dateFormat.format(new Date(dateInMillis));
+                    if(!dateSet.contains(date)) {
+                        dateSet.add(date);
+                        TemperatureModel temperatureModel = createTemperatureModel(content);
+                        weatherList.add(temperatureModel);
+                    }
+                }
+                weatherListWeakRef.get().postValue(weatherList);
+                Log.d(TAG, "onResponse: weatherList = "+weatherList.size());
+            } else {
 
-            TemperatureModel temperatureModel = new TemperatureModel(Math.round(temperature), maxTemperature, minTemperature, weatherName, weatherDesc, weatherIcon);
-            Log.d(TAG, "onResponse: success temperature = "+Math.round(temperature));
+                TemperatureModel temperatureModel = createTemperatureModel(result);
+                currentTempWeakRef.get().postValue(temperatureModel);
+            }
         } else {
             Log.d(TAG, "onResponse: failure= "+response.errorBody());
         }
+    }
+
+    private TemperatureModel createTemperatureModel(JsonElement result) {
+        double temperature = result.getAsJsonObject().get("main").getAsJsonObject().get("temp").getAsDouble() - KELVIN_TEMP;
+        double maxTemperature = result.getAsJsonObject().get("main").getAsJsonObject().get("temp_max").getAsDouble() - KELVIN_TEMP;
+        double minTemperature = result.getAsJsonObject().get("main").getAsJsonObject().get("temp_min").getAsDouble() - KELVIN_TEMP;
+
+       // Log.d(TAG, "onResponse: success temperature = " + Math.round(temperature));
+
+        JsonElement weather = result.getAsJsonObject().get("weather").getAsJsonArray().get(0);
+        String weatherName = weather.getAsJsonObject().get("main").getAsString();
+        String weatherDesc = weather.getAsJsonObject().get("description").getAsString();
+        String weatherIcon = weather.getAsJsonObject().get("icon").getAsString();
+
+        TemperatureModel temperatureModel = new TemperatureModel(Math.round(temperature), maxTemperature, minTemperature, weatherName, weatherDesc, weatherIcon);
+        return temperatureModel;
     }
 
     @Override
