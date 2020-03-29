@@ -35,13 +35,9 @@ public class TemperatureViewModel extends AndroidViewModel {
 
     public void fetchCurrentTemperature(final String cityName) {
         networkUtil.fetchCurrentWeatherTemperature(cityName);
+    }
 
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                networkUtil.fetchTemperatureForecast(cityName);
-            }
-        }, 100);
+    public void fetchTemperatureForecast(String cityName) {
+        networkUtil.fetchTemperatureForecast(cityName);
     }
 }

@@ -4,19 +4,116 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/layout_container"
+    android:background="#35BAF7"
     tools:context=".MainActivity">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="20sp"
+        android:textColor="#E6E3E3"
+        android:text="Loading..."
+        android:id="@+id/extra_info">
+    </TextView>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/extra_info"
+        android:layout_marginTop="10dp"
+        android:text="Retry"
+        android:textSize="20dp"
+        android:id="@+id/retry_button"
+        android:layout_centerInParent="true"
+        android:visibility="gone"></Button>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/view_container">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:id="@+id/local_address">
+    </TextView>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/text"
-        android:text="My weather"
+        android:layout_marginTop="150dp"
+        android:layout_marginStart="20dp"
+        android:textColor="#FFFFFF"
+        android:textSize="70sp"
         />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:textSize="18sp"
+        android:textColor="#FAFAFA"
         android:layout_below="@+id/text"
+        android:id="@+id/desc">
+    </TextView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/desc"
+        android:textSize="20sp"
+        android:textColor="#FAFAFA"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:id="@+id/details_header"
+        android:textStyle="italic"
+        android:text="Temperature forecast for upcoming days :- "></TextView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/details_header"
+        android:textColor="#FAFAFA"
+        android:textSize="25sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
         android:id="@+id/weather_forecast">
     </TextView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/weather_forecast"
+        android:textSize="20sp"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:id="@+id/swipe_info"
+        android:textStyle="italic"
+        android:text="Please swipe up to see more details">
+
+    </TextView>
+
+    <LinearLayout
+        android:id = "@+id/hidden_view"
+        android:background="#F1FF42"
+        android:orientation = "vertical"
+        android:layout_alignParentBottom = "true"
+        android:layout_width = "match_parent"
+        android:layout_marginTop = "20dp"
+        android:layout_height = "200dp"
+        android:visibility="invisible"
+        >
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/forecastList"
+            ></androidx.recyclerview.widget.RecyclerView>
+
+    </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>

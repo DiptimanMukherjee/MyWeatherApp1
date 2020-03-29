@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">MyWeatherApp</string>
+    <string name="app_name">WeatherApp</string>
+    <string name="error_string">Some error occurred, please retry</string>
+    <string name="error_string_internet">Please check internet connection</string>
+    <string name="error_string_location">Please enable device location</string>
+    <string name="error_string_permission">Please allow permission</string>
 </resources>

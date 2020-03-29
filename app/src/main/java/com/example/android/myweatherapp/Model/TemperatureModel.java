@@ -7,14 +7,19 @@ public class TemperatureModel {
     private String weatherName;
     private String weatherDescription;
     private String weatherIcon;
+    private String day;
 
-    public TemperatureModel(double currentTemp, double max, double min, String weatherName, String weatherDescription, String weatherIcon) {
+    private final String IMAGE_SOURCE = "http://openweathermap.org/img/wn/";
+    private final String IMAGE_TYPE = ".png";
+
+    public TemperatureModel(double currentTemp, double max, double min, String weatherName, String weatherDescription, String weatherIcon, String day) {
         this.temperature = currentTemp;
         this.maxTemperature = max;
         this.minTemperature = min;
         this.weatherName = weatherName;
         this.weatherDescription = weatherDescription;
-        this.weatherIcon = weatherIcon;
+        this.weatherIcon = IMAGE_SOURCE + weatherIcon + IMAGE_TYPE;
+        this.day = day;
     }
 
     public double getTemperature() {
@@ -39,5 +44,9 @@ public class TemperatureModel {
 
     public String getWeatherIcon() {
         return weatherIcon;
+    }
+
+    public String getDay() {
+        return day;
     }
 }

@@ -14,6 +14,7 @@ import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -33,10 +34,11 @@ public class NetworkUtil implements Callback<JsonElement> {
     private final String API_KEY = "aaea007c8ae69c5d3e62021bc265b1cd";
     private String BASE_URl = "https://api.openweathermap.org/data/2.5/";
     private final double KELVIN_TEMP = 273.15;
-    private final WeatherAPI weatherApi;
+    private WeatherAPI weatherApi;
     private String mCityName;
     private WeakReference<MutableLiveData<TemperatureModel>> currentTempWeakRef;
     private WeakReference<MutableLiveData<List<TemperatureModel>>> weatherListWeakRef;
+    String[] DAYS_IN_WEEK = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
     public NetworkUtil(MutableLiveData<TemperatureModel> currentTemperature, MutableLiveData<List<TemperatureModel>> weatherList) {
         currentTempWeakRef = new WeakReference<>(currentTemperature);
@@ -66,10 +68,6 @@ public class NetworkUtil implements Callback<JsonElement> {
         call.enqueue(this);
     }
 
-
-
-
-
     @Override
     public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
         if(response.isSuccessful()) {
@@ -98,27 +96,35 @@ public class NetworkUtil implements Callback<JsonElement> {
             }
         } else {
             Log.d(TAG, "onResponse: failure= "+response.errorBody());
+            currentTempWeakRef.get().postValue(null);
         }
     }
 
-    private TemperatureModel createTemperatureModel(JsonElement result) {
+    @Override
+    public void onFailure(Call<JsonElement> call, Throwable t) {
+        Log.d(TAG, "onFailure: ");
+        currentTempWeakRef.get().postValue(null);
+    }
+
+    public TemperatureModel createTemperatureModel(JsonElement result) {
+        long dateInMillis = result.getAsJsonObject().get("dt").getAsLong() * 1000;
+        Date date = new Date(dateInMillis);
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        String day = DAYS_IN_WEEK[dayOfWeek];
+
         double temperature = result.getAsJsonObject().get("main").getAsJsonObject().get("temp").getAsDouble() - KELVIN_TEMP;
         double maxTemperature = result.getAsJsonObject().get("main").getAsJsonObject().get("temp_max").getAsDouble() - KELVIN_TEMP;
         double minTemperature = result.getAsJsonObject().get("main").getAsJsonObject().get("temp_min").getAsDouble() - KELVIN_TEMP;
 
-       // Log.d(TAG, "onResponse: success temperature = " + Math.round(temperature));
 
         JsonElement weather = result.getAsJsonObject().get("weather").getAsJsonArray().get(0);
         String weatherName = weather.getAsJsonObject().get("main").getAsString();
         String weatherDesc = weather.getAsJsonObject().get("description").getAsString();
         String weatherIcon = weather.getAsJsonObject().get("icon").getAsString();
 
-        TemperatureModel temperatureModel = new TemperatureModel(Math.round(temperature), maxTemperature, minTemperature, weatherName, weatherDesc, weatherIcon);
+        TemperatureModel temperatureModel = new TemperatureModel(Math.round(temperature), maxTemperature, minTemperature, weatherName, weatherDesc, weatherIcon, day);
         return temperatureModel;
-    }
-
-    @Override
-    public void onFailure(Call<JsonElement> call, Throwable t) {
-        Log.d(TAG, "onFailure: ");
     }
 }
